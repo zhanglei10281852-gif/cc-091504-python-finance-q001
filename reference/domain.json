@@ -1,0 +1,14 @@
+{
+  "event_types": [
+    "split",
+    "rights_issue",
+    "cash_dividend",
+    "reinvestment"
+  ],
+  "currencies": [
+    "CNY",
+    "HKD",
+    "USD"
+  ],
+  "quantity_precision": 6
+}
