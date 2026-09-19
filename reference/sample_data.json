@@ -1,0 +1,113 @@
+{
+  "scenario": "客户 ACC-A 持有 0700.HK，期间接连发生拆股、配股、现金红利再投资与跨账户转入；之后红利公告与汇率迟到更正。",
+  "holidays": ["2026-05-25", "2026-06-24", "2026-07-01", "2026-10-01"],
+  "stages": [
+    {
+      "name": "1-初始入账（成交、转入、拆股、配股、红利再投资，含一条重传消息）",
+      "messages": [
+        {"message_id": "m-001", "kind": "cash_movement", "payload": {
+          "movement_id": "CM-001", "account": "ACC-A", "currency": "HKD",
+          "amount": "1000000", "direction": "deposit", "date": "2026-03-01",
+          "note": "期初入金"}},
+        {"message_id": "m-002", "kind": "trade", "payload": {
+          "trade_id": "T-001", "account": "ACC-A", "security": "0700.HK",
+          "side": "BUY", "quantity": "1000", "price": "300", "currency": "HKD",
+          "fee": "100", "fee_currency": "HKD", "trade_date": "2026-03-02"}},
+        {"message_id": "m-003", "kind": "trade", "payload": {
+          "trade_id": "T-002", "account": "ACC-A", "security": "0700.HK",
+          "side": "BUY", "quantity": "500", "price": "320", "currency": "HKD",
+          "fee": "80", "fee_currency": "HKD", "trade_date": "2026-03-10"}},
+        {"message_id": "m-004", "kind": "trade", "payload": {
+          "trade_id": "T-003", "account": "ACC-A", "security": "0700.HK",
+          "side": "SELL", "quantity": "300", "price": "330", "currency": "HKD",
+          "fee": "50", "fee_currency": "HKD", "trade_date": "2026-03-20"}},
+        {"message_id": "m-005", "kind": "transfer", "payload": {
+          "transfer_id": "TR-001", "type": "transfer_in", "account": "ACC-A",
+          "counter_account": "ACC-B", "security": "0700.HK", "quantity": "230",
+          "cost_total": "66700", "currency": "HKD", "date": "2026-04-01"}},
+        {"message_id": "m-006", "kind": "corporate_action", "payload": {
+          "action_id": "CA-SPLIT-1", "security": "0700.HK", "type": "split",
+          "announcement_version": 1, "ex_date": "2026-04-15",
+          "record_date": "2026-04-15", "pay_date": "2026-04-15",
+          "numerator": "5", "denominator": "1", "currency": "HKD"}},
+        {"message_id": "m-006", "kind": "corporate_action", "payload": {
+          "action_id": "CA-SPLIT-1", "security": "0700.HK", "type": "split",
+          "announcement_version": 1, "ex_date": "2026-04-15",
+          "record_date": "2026-04-15", "pay_date": "2026-04-15",
+          "numerator": "5", "denominator": "1", "currency": "HKD"}},
+        {"message_id": "m-007", "kind": "corporate_action", "payload": {
+          "action_id": "CA-RIGHTS-1", "security": "0700.HK", "type": "rights_issue",
+          "announcement_version": 1, "ex_date": "2026-05-04",
+          "record_date": "2026-05-06", "pay_date": "2026-05-20",
+          "ratio": "0.25", "subscription_price": "55", "currency": "HKD",
+          "fee": {"amount": "25", "currency": "USD"},
+          "fraction_policy": "cash_in_lieu", "cash_in_lieu_price": "70"}},
+        {"message_id": "m-008", "kind": "election", "payload": {
+          "account": "ACC-A", "action_id": "CA-RIGHTS-1", "choice": "subscribe"}},
+        {"message_id": "m-009", "kind": "fx_rate", "payload": {
+          "pair": "USD/HKD", "rate_date": "2026-05-20", "rate": "7.801",
+          "source_version": 1}},
+        {"message_id": "m-010", "kind": "corporate_action", "payload": {
+          "action_id": "CA-DIV-1", "security": "0700.HK", "type": "cash_dividend",
+          "announcement_version": 1, "ex_date": "2026-06-08",
+          "record_date": "2026-06-10", "pay_date": "2026-06-24",
+          "dividend_per_share": "2.00", "currency": "HKD",
+          "fee": {"amount": "15", "currency": "USD"}}},
+        {"message_id": "m-011", "kind": "corporate_action", "payload": {
+          "action_id": "CA-REINV-1", "security": "0700.HK", "type": "reinvestment",
+          "announcement_version": 1, "ex_date": "2026-06-08",
+          "record_date": "2026-06-10", "pay_date": "2026-06-24",
+          "source_action_id": "CA-DIV-1", "reinvest_price": "68", "currency": "HKD"}},
+        {"message_id": "m-012", "kind": "election", "payload": {
+          "account": "ACC-A", "action_id": "CA-REINV-1", "choice": "reinvest"}},
+        {"message_id": "m-013", "kind": "fx_rate", "payload": {
+          "pair": "USD/HKD", "rate_date": "2026-06-24", "rate": "7.795",
+          "source_version": 1}}
+      ]
+    },
+    {
+      "name": "2-待确认转出（冻结 500 股）",
+      "messages": [
+        {"message_id": "m-014", "kind": "transfer", "payload": {
+          "transfer_id": "TR-002", "type": "transfer_out", "account": "ACC-A",
+          "counter_account": "ACC-B", "security": "0700.HK", "quantity": "500",
+          "currency": "HKD", "date": "2026-07-06", "status": "pending"}}
+      ]
+    },
+    {
+      "name": "3-确认转出（解冻并扣减）",
+      "messages": [
+        {"message_id": "m-015", "kind": "confirmation", "payload": {
+          "message_id": "m-014", "status": "confirmed"}}
+      ]
+    },
+    {
+      "name": "4-出具客户快照（2026-07-10）",
+      "snapshot": {"account": "ACC-A", "date": "2026-07-10"}
+    },
+    {
+      "name": "5-迟到更正（红利公告 v2 与汇率 v2，只能产生新版本）",
+      "messages": [
+        {"message_id": "m-016", "kind": "corporate_action", "payload": {
+          "action_id": "CA-DIV-1", "security": "0700.HK", "type": "cash_dividend",
+          "announcement_version": 2, "ex_date": "2026-06-08",
+          "record_date": "2026-06-10", "pay_date": "2026-06-24",
+          "dividend_per_share": "2.10", "currency": "HKD",
+          "fee": {"amount": "15", "currency": "USD"}}},
+        {"message_id": "m-017", "kind": "fx_rate", "payload": {
+          "pair": "USD/HKD", "rate_date": "2026-06-24", "rate": "7.796",
+          "source_version": 2}}
+      ]
+    },
+    {
+      "name": "6-待确认公告（新红利尚未确认，不生效、仅列示）",
+      "messages": [
+        {"message_id": "m-018", "kind": "corporate_action", "payload": {
+          "action_id": "CA-DIV-2", "security": "0700.HK", "type": "cash_dividend",
+          "announcement_version": 1, "ex_date": "2026-09-23",
+          "record_date": "2026-09-25", "pay_date": "2026-10-09",
+          "dividend_per_share": "1.50", "currency": "HKD", "status": "pending"}}
+      ]
+    }
+  ]
+}
